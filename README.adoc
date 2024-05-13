@@ -1,0 +1,35 @@
+= Godot with C#
+
+We assume you already know how to use C#.
+If not, you'll easliy find many tutorials, because C# is a common, majure and relevant language -- https://www.freecodecamp.org/learn/foundational-c-sharp-with-microsoft[for example the freeCodeCamp course].
+
+A couple of notes on how to use it with Godot:
+
+* You will need to download the _Mono_ Version of Godot
+** **Don't worry**, Mono ist just the name that stuck, **it is running .NET Core!**
+* Once you are in the editor, create a new script file and make sure to pick C# in the dropdown
+** This will create a regular `csproj` file for you
+** The editor can be configured to open your preferred IDE when double clicking a script file
+* As soon as the project has been created **you can use your regular IDE** (e.g. Rider or VS -- look for Godot integration plugins)
+** Don't bother with the source editor within the Godot editor, it is barbones and comes nowhere near the dev experience in an IDE
+** With a plugin in your IDE you can start the game (**and debug!**) right from your IDE!
+* You *can* use all regular .NET tools, including NuGet
+* Project SDK
+** A C# project that should be able to be run from Godot and use Godot classes should use the `Project Sdk="Godot.NET.Sdk/4.2.2"` (adjust Godot version) project sdk
+** _Hint:_ by default Godot creates a .NET 6 project, but you **can** simply change the target framework to **.NET 8** and it will work just fine (including all benefits like perf. improvements)
+* When creating a script _that should be attached to a Node_ you _have_ to inherit from a Godot node (the one you want to attach the script to, e.g. `Area2D`)
+** The typical methods like `_Process` are hooked into by `override` (no 'magic' reflection method calling here)
+** Regular C# classes (for systems development) don't need to inherit nodes and can be done as usual, also in extra class library projects
+* As with many frameworks where the creation of objects is done by the engine we cannot really make use of the constructor (also no real constructor injection) -- use `_Ready` for your initialization code and keep in mind that fields etc. should be designed for late/lazy init
+* A C# class can be the receiver of signals (can be hooked up in the editor), but you have to make sure the signature matches what the signal expects (no auto-generation), otherwise it won't show up in the editor method picker
+** In general, signals are not as relevant for C#, because we can use regular events or pub/sub architectures (which have the benefit of being .NET runtime internal and not requiring a managed/unmanaged transition via the engine) -- all Godot nodes define C# events for their signals, use those instead of stringly-typed signal APIs!
+* `Export` fields can be `private`, but the data type has to be `Variant` compatible (that is true for basic types like `int` etc. and all custom types which inherit from `Resource` properly)
+** Arrays can also be exported
+** Enum fields turn into nice dropdowns in the editor
+
+These are just a few hints to get you started.
+In general: it _just works_, you have regular, up-to-date .NET available (unlike Unity).
+Usual rules about not stressing the GC too much etc. apply as with all game engines.
+Tutorials are mostly for GDScript, but translating them to C# is usually no big deal.
+
+WARNING: Web export is currently not working, keep an eye at https://github.com/raulsntos/godot-dotnet[GDExtension for C#] and https://github.com/godotengine/godot/pull/90510[Libgodot] for some work to allow Godot to be used as a library which would fix this (and allow for even more awesome stuff).
